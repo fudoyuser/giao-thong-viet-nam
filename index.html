@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Giao thông Việt Nam</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Tra cứu mã biển số xe 63 tỉnh cũ và 34 tỉnh, thành mới sau sáp nhập 2025, cùng các biển báo giao thông theo QCVN 41:2024/BGTVT.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Be+Vietnam+Pro:wght@400;500;600&display=swap">
+<style>
+/* Layout: biển chỉ dẫn xanh làm header; tab giữa 2 phần; lưới thẻ biển số / biển báo */
+:root{
+  --bg:#f3f5f7; --surface:#ffffff; --fg:#14202b; --muted:#5b6977; --line:#d8dfe6;
+  --road:#0a5ba8; --road-fg:#ffffff; --plate-ink:#111; --plate:#fbfbf8; --hl:#ffd23f;
+  --red:#d1202a; --yellow:#ffcf1a; --blue:#0a5ba8; --sign-ink:#111;
+  --display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --body:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f151b; --surface:#17202a; --fg:#e6ecf1; --muted:#97a6b4; --line:#2a3744;
+  --road:#0b4f91; --road-fg:#ffffff; --hl:#ffd23f; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f151b; --surface:#17202a; --fg:#e6ecf1; --muted:#97a6b4; --line:#2a3744;
+  --road:#0b4f91; --road-fg:#ffffff; --hl:#ffd23f; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.55;margin:0}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header{background:var(--road);color:var(--road-fg)}
+header .wrap{padding-block:28px 0}
+.eyebrow{font-family:var(--display);letter-spacing:.12em;text-transform:uppercase;font-weight:600;opacity:.85;font-size:14px}
+h1{font-family:var(--display);font-weight:700;font-size:clamp(34px,6vw,56px);line-height:1;margin:6px 0 10px;text-wrap:balance}
+header p{margin:0 0 20px;max-width:62ch;opacity:.92}
+nav{display:flex;gap:4px;flex-wrap:wrap}
+nav a{font-family:var(--display);font-size:20px;font-weight:600;letter-spacing:.02em;color:var(--road-fg);text-decoration:none;padding:10px 18px;border-radius:8px 8px 0 0;opacity:.8}
+nav a[aria-current="page"]{background:var(--bg);color:var(--fg);opacity:1}
+nav a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--hl);outline-offset:2px}
+main{padding-block:28px 56px}
+h2{font-family:var(--display);font-size:32px;font-weight:700;margin:0 0 4px;text-wrap:balance}
+h3{font-family:var(--display);font-size:24px;font-weight:600;margin:36px 0 4px}
+.lead{color:var(--muted);margin:0 0 20px;max-width:75ch}
+.tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:18px}
+input[type=search]{flex:1 1 260px;font:inherit;padding:11px 14px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--fg)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface)}
+.seg button{font:inherit;font-size:14px;padding:10px 14px;border:0;background:transparent;color:var(--fg);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--road);color:var(--road-fg)}
+.count{color:var(--muted);font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;min-width:0;display:flex;flex-direction:column;gap:10px}
+.card .name{font-weight:600;font-size:17px;line-height:1.3}
+.card .meta{color:var(--muted);font-size:13px}
+.plates{display:flex;flex-wrap:wrap;gap:6px}
+.plate{font-family:var(--display);font-weight:700;font-size:22px;line-height:1;color:var(--plate-ink);background:var(--plate);border:2px solid var(--plate-ink);border-radius:5px;padding:5px 9px 4px;min-width:46px;text-align:center;font-variant-numeric:tabular-nums;box-shadow:inset 0 0 0 2px var(--plate)}
+.from{display:flex;flex-direction:column;gap:6px;border-top:1px dashed var(--line);padding-top:10px}
+.from div{display:flex;justify-content:space-between;gap:10px;font-size:14px}
+.from b{font-family:var(--display);font-size:17px;font-variant-numeric:tabular-nums}
+.tag{display:inline-block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;font-weight:600;padding:2px 8px;border-radius:99px;background:var(--hl);color:#14202b;align-self:flex-start}
+.tag.keep{background:var(--line);color:var(--fg)}
+mark{background:var(--hl);color:#14202b;border-radius:2px}
+.note{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--hl);border-radius:8px;padding:14px 16px;margin:0 0 22px;font-size:14px;max-width:90ch}
+.note p{margin:0}.note p+p{margin-top:6px}
+.colors{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin-top:12px}
+.colors .card{flex-direction:row;align-items:center}
+.cplate{font-family:var(--display);font-weight:700;font-size:20px;padding:6px 10px;border-radius:5px;border:2px solid;white-space:nowrap}
+.signs{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.sign{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 12px;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
+.sign svg{width:84px;height:84px}
+.sign code{font-family:var(--display);font-size:15px;font-weight:600;color:var(--muted);letter-spacing:.04em}
+.sign span{font-size:13.5px;line-height:1.35}
+.group-desc{color:var(--muted);margin:0 0 14px;font-size:14px;max-width:80ch}
+footer{border-top:1px solid var(--line);color:var(--muted);font-size:13px}
+footer .wrap{padding-block:20px 32px}
+footer a{color:inherit}
+@media (prefers-reduced-motion:no-preference){.card,.sign{transition:transform .15s}.sign:hover{transform:translateY(-2px)}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="eyebrow">Tra cứu nhanh · Cập nhật 2025</div>
+    <h1>Giao thông Việt Nam</h1>
+    <p>Mã biển số xe của 63 tỉnh, thành cũ và 34 tỉnh, thành mới sau sáp nhập từ 01/7/2025, cùng hệ thống biển báo đường bộ theo QCVN 41:2024/BGTVT.</p>
+    <nav aria-label="Chuyên mục">
+      <a href="#bien-so" id="tab-plates">Biển số xe</a>
+      <a href="#bien-bao" id="tab-signs">Biển báo giao thông</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <section id="view-plates">
+    <h2>Biển số xe theo tỉnh, thành</h2>
+    <p class="lead">Gõ tên tỉnh hoặc mã số (ví dụ <b>88</b>, <b>Bình Dương</b>) để biết tỉnh cũ đó nay thuộc tỉnh mới nào.</p>
+    <div class="note">
+      <p><b>Biển số cũ vẫn dùng bình thường.</b> Sau sáp nhập, mã của các tỉnh cũ được giữ lại và gộp về tỉnh mới. Người dân không bắt buộc đổi biển số hay đăng ký lại xe chỉ vì địa giới hành chính thay đổi.</p>
+      <p>Mã <b>80</b> dùng cho xe của các cơ quan trung ương do Cục Cảnh sát giao thông đăng ký.</p>
+    </div>
+    <div class="tools">
+      <input type="search" id="q" placeholder="Tìm tỉnh hoặc mã biển số…" aria-label="Tìm tỉnh hoặc mã biển số">
+      <div class="seg" role="group" aria-label="Chế độ xem">
+        <button type="button" id="m-new" aria-pressed="true">34 tỉnh mới</button>
+        <button type="button" id="m-old" aria-pressed="false">63 tỉnh cũ</button>
+      </div>
+      <span class="count" id="count"></span>
+    </div>
+    <div class="grid" id="plate-grid"></div>
+
+    <h3>Màu biển số (Thông tư 79/2024/TT-BCA)</h3>
+    <div class="colors">
+      <div class="card"><span class="cplate" style="background:#fff;color:#111;border-color:#111">29A-123.45</span><span>Nền trắng, chữ đen: xe cá nhân, doanh nghiệp</span></div>
+      <div class="card"><span class="cplate" style="background:#f5c400;color:#111;border-color:#111">51F-678.90</span><span>Nền vàng, chữ đen: xe kinh doanh vận tải</span></div>
+      <div class="card"><span class="cplate" style="background:#0a4aa0;color:#fff;border-color:#0a4aa0">80A-012.34</span><span>Nền xanh, chữ trắng: cơ quan nhà nước, đơn vị sự nghiệp công</span></div>
+      <div class="card"><span class="cplate" style="background:#c8102e;color:#fff;border-color:#c8102e">TM-12-34</span><span>Nền đỏ, chữ trắng: xe quân đội</span></div>
+      <div class="card"><span class="cplate" style="background:#fff;color:#c8102e;border-color:#c8102e">80-NG-123</span><span>Nền trắng, chữ đỏ (ký hiệu NG, QT…): cơ quan ngoại giao, tổ chức quốc tế</span></div>
+    </div>
+  </section>
+
+  <section id="view-signs" hidden>
+    <h2>Biển báo giao thông đường bộ</h2>
+    <p class="lead">Các biển thường gặp theo QCVN 41:2024/BGTVT, hiệu lực từ 01/01/2025. Hình vẽ minh họa đã giản lược, dùng để nhận diện nhóm và ý nghĩa.</p>
+    <div class="tools">
+      <input type="search" id="qs" placeholder="Tìm biển báo (ví dụ: cấm rẽ, P.127, trẻ em)…" aria-label="Tìm biển báo">
+      <span class="count" id="count-s"></span>
+    </div>
+    <div id="sign-groups"></div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    Nguồn: Nghị quyết 202/2025/QH15 về sắp xếp đơn vị hành chính cấp tỉnh; Thông tư 79/2024/TT-BCA về đăng ký xe; QCVN 41:2024/BGTVT về báo hiệu đường bộ. Trang tra cứu tham khảo, hãy đối chiếu văn bản gốc khi cần dùng cho mục đích pháp lý.
+  </div>
+</footer>
+
+<script>
+/* ===== DỮ LIỆU BIỂN SỐ ===== */
+// Tỉnh mới (34 đơn vị) và các tỉnh cũ hợp thành, kèm mã biển số
+const NEW = [
+  {name:"Thành phố Hà Nội", center:"Hà Nội", from:[["Hà Nội",["29","30","31","32","33","40"]]]},
+  {name:"Thành phố Huế", center:"Huế", from:[["Thừa Thiên Huế",["75"]]]},
+  {name:"Lai Châu", center:"Lai Châu", from:[["Lai Châu",["25"]]]},
+  {name:"Điện Biên", center:"Điện Biên Phủ", from:[["Điện Biên",["27"]]]},
+  {name:"Sơn La", center:"Sơn La", from:[["Sơn La",["26"]]]},
+  {name:"Lạng Sơn", center:"Lạng Sơn", from:[["Lạng Sơn",["12"]]]},
+  {name:"Quảng Ninh", center:"Hạ Long", from:[["Quảng Ninh",["14"]]]},
+  {name:"Thanh Hóa", center:"Thanh Hóa", from:[["Thanh Hóa",["36"]]]},
+  {name:"Nghệ An", center:"Vinh", from:[["Nghệ An",["37"]]]},
+  {name:"Hà Tĩnh", center:"Hà Tĩnh", from:[["Hà Tĩnh",["38"]]]},
+  {name:"Cao Bằng", center:"Cao Bằng", from:[["Cao Bằng",["11"]]]},
+  {name:"Tuyên Quang", center:"Tuyên Quang", from:[["Tuyên Quang",["22"]],["Hà Giang",["23"]]]},
+  {name:"Lào Cai", center:"Yên Bái (cũ)", from:[["Lào Cai",["24"]],["Yên Bái",["21"]]]},
+  {name:"Thái Nguyên", center:"Thái Nguyên", from:[["Thái Nguyên",["20"]],["Bắc Kạn",["97"]]]},
+  {name:"Phú Thọ", center:"Việt Trì", from:[["Phú Thọ",["19"]],["Vĩnh Phúc",["88"]],["Hòa Bình",["28"]]]},
+  {name:"Bắc Ninh", center:"Bắc Giang (cũ)", from:[["Bắc Ninh",["99"]],["Bắc Giang",["98"]]]},
+  {name:"Hưng Yên", center:"Hưng Yên", from:[["Hưng Yên",["89"]],["Thái Bình",["17"]]]},
+  {name:"Thành phố Hải Phòng", center:"Hải Phòng", from:[["Hải Phòng",["15","16"]],["Hải Dương",["34"]]]},
+  {name:"Ninh Bình", center:"Ninh Bình", from:[["Ninh Bình",["35"]],["Hà Nam",["90"]],["Nam Định",["18"]]]},
+  {name:"Quảng Trị", center:"Đồng Hới (cũ)", from:[["Quảng Trị",["74"]],["Quảng Bình",["73"]]]},
+  {name:"Thành phố Đà Nẵng", center:"Đà Nẵng", from:[["Đà Nẵng",["43"]],["Quảng Nam",["92"]]]},
+  {name:"Quảng Ngãi", center:"Quảng Ngãi", from:[["Quảng Ngãi",["76"]],["Kon Tum",["82"]]]},
+  {name:"Gia Lai", center:"Quy Nhơn (cũ)", from:[["Gia Lai",["81"]],["Bình Định",["77"]]]},
+  {name:"Khánh Hòa", center:"Nha Trang", from:[["Khánh Hòa",["79"]],["Ninh Thuận",["85"]]]},
+  {name:"Lâm Đồng", center:"Đà Lạt", from:[["Lâm Đồng",["49"]],["Đắk Nông",["48"]],["Bình Thuận",["86"]]]},
+  {name:"Đắk Lắk", center:"Buôn Ma Thuột", from:[["Đắk Lắk",["47"]],["Phú Yên",["78"]]]},
+  {name:"Thành phố Hồ Chí Minh", center:"TP. Hồ Chí Minh", from:[["TP. Hồ Chí Minh",["41","50","51","52","53","54","55","56","57","58","59"]],["Bình Dương",["61"]],["Bà Rịa – Vũng Tàu",["72"]]]},
+  {name:"Đồng Nai", center:"Biên Hòa", from:[["Đồng Nai",["39","60"]],["Bình Phước",["93"]]]},
+  {name:"Tây Ninh", center:"Tân An (cũ)", from:[["Tây Ninh",["70"]],["Long An",["62"]]]},
+  {name:"Thành phố Cần Thơ", center:"Cần Thơ", from:[["Cần Thơ",["65"]],["Sóc Trăng",["83"]],["Hậu Giang",["95"]]]},
+  {name:"Vĩnh Long", center:"Vĩnh Long", from:[["Vĩnh Long",["64"]],["Bến Tre",["71"]],["Trà Vinh",["84"]]]},
+  {name:"Đồng Tháp", center:"Mỹ Tho (cũ)", from:[["Đồng Tháp",["66"]],["Tiền Giang",["63"]]]},
+  {name:"Cà Mau", center:"Cà Mau", from:[["Cà Mau",["69"]],["Bạc Liêu",["94"]]]},
+  {name:"An Giang", center:"Rạch Giá (cũ)", from:[["An Giang",["67"]],["Kiên Giang",["68"]]]}
+];
+const OLD = [];
+NEW.forEach(n => n.from.forEach(([o,codes]) => OLD.push({name:o, codes, to:n.name, merged:n.from.length>1})));
+OLD.sort((a,b)=>(+a.codes[0])-(+b.codes[0]));
+
+const fold = s => s.normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/đ/g,"d").replace(/Đ/g,"D").toLowerCase();
+const esc = s => s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const plate = (c,hit) => `<span class="plate"${hit?' style="background:var(--hl)"':''}>${c}</span>`;
+
+let mode = "new";
+function renderPlates(){
+  const raw = document.getElementById("q").value.trim(), q = fold(raw), isNum = /^\d+$/.test(raw);
+  const grid = document.getElementById("plate-grid"); let html = "", n = 0;
+  if(mode==="new"){
+    NEW.forEach(p=>{
+      const codes = p.from.flatMap(f=>f[1]);
+      const hay = fold(p.name+" "+p.center+" "+p.from.map(f=>f[0]).join(" "));
+      const ok = !q || (isNum ? codes.some(c=>c.startsWith(raw)) : hay.includes(q));
+      if(!ok) return; n++;
+      const merged = p.from.length>1;
+      html += `<article class="card"><span class="tag${merged?'':' keep'}">${merged?'Sáp nhập '+p.from.length+' tỉnh':'Giữ nguyên'}</span>
+        <div class="name">${esc(p.name)}</div><div class="meta">Trung tâm hành chính: ${esc(p.center)}</div>
+        <div class="plates">${codes.map(c=>plate(c,isNum&&c.startsWith(raw))).join("")}</div>
+        ${merged?`<div class="from">${p.from.map(([o,c])=>`<div><span>${esc(o)}</span><b>${c.join(", ")}</b></div>`).join("")}</div>`:""}</article>`;
+    });
+  } else {
+    OLD.forEach(o=>{
+      const ok = !q || (isNum ? o.codes.some(c=>c.startsWith(raw)) : fold(o.name+" "+o.to).includes(q));
+      if(!ok) return; n++;
+      html += `<article class="card"><div class="plates">${o.codes.map(c=>plate(c,isNum&&c.startsWith(raw))).join("")}</div>
+        <div class="name">${esc(o.name)}</div>
+        <div class="meta">${o.merged?'Nay thuộc: <b>'+esc(o.to)+'</b>':'Không sáp nhập ('+esc(o.to)+')'}</div></article>`;
+    });
+  }
+  grid.innerHTML = html || `<p class="lead">Không tìm thấy kết quả cho “${esc(raw)}”. Thử tên tỉnh không dấu hoặc mã 2 chữ số.</p>`;
+  document.getElementById("count").textContent = `${n} ${mode==="new"?"tỉnh, thành mới":"tỉnh, thành cũ"}`;
+}
+document.getElementById("q").addEventListener("input",renderPlates);
+["new","old"].forEach(m=>document.getElementById("m-"+m).addEventListener("click",()=>{
+  mode=m; document.getElementById("m-new").setAttribute("aria-pressed",m==="new");
+  document.getElementById("m-old").setAttribute("aria-pressed",m==="old"); renderPlates();
+}));
+
+/* ===== BIỂN BÁO: VẼ SVG ===== */
+const R="#d1202a",Y="#ffcf1a",B="#0a5ba8",K="#111",W="#fff";
+const svg = inner => `<svg viewBox="0 0 100 100" role="img" aria-hidden="true">${inner}</svg>`;
+const prohib = (sym,slash) => svg(`<circle cx="50" cy="50" r="46" fill="${W}" stroke="${R}" stroke-width="8"/>${sym||""}${slash?`<line x1="20" y1="20" x2="80" y2="80" stroke="${R}" stroke-width="8"/>`:""}`);
+const mand = sym => svg(`<circle cx="50" cy="50" r="47" fill="${B}" stroke="${W}" stroke-width="2"/>${sym}`);
+const warn = (sym,inv) => svg(inv
+  ? `<path d="M6 12 H94 L50 92 Z" fill="${W}" stroke="${R}" stroke-width="7" stroke-linejoin="round"/>${sym||""}`
+  : `<path d="M50 8 L94 88 H6 Z" fill="${Y}" stroke="${R}" stroke-width="7" stroke-linejoin="round"/><g transform="translate(0 8) scale(1)">${sym}</g>`);
+const info = (sym,bg) => svg(`<rect x="6" y="6" width="88" height="88" rx="8" fill="${bg||B}"/>${sym}`);
+const txt = (t,col,size,y) => `<text x="50" y="${y||50}" text-anchor="middle" dominant-baseline="central" font-family="Barlow Condensed,Arial Narrow,sans-serif" font-weight="700" font-size="${size||40}" fill="${col}">${t}</text>`;
+const arrow = (d,col,w) => `<path d="${d}" fill="none" stroke="${col}" stroke-width="${w||8}" stroke-linecap="round" stroke-linejoin="round"/>`;
+const head = (x,y,rot,col,s) => `<path d="M0 -${s||11} L${s||11} ${(s||11)*0.4} H-${s||11} Z" fill="${col}" transform="translate(${x} ${y}) rotate(${rot})"/>`;
+const car = (col,sc,tx,ty) => `<g transform="translate(${tx??50} ${ty??52}) scale(${sc||1})" fill="${col}"><path d="M-26 4 L-22 -8 Q-20 -13 -14 -13 H14 Q20 -13 22 -8 L26 4 V12 H-26 Z"/><circle cx="-15" cy="13" r="6"/><circle cx="15" cy="13" r="6"/></g>`;
+const truck = col => `<g fill="${col}"><rect x="22" y="34" width="36" height="26"/><path d="M60 42 H72 L80 51 V60 H60 Z"/><circle cx="32" cy="64" r="6"/><circle cx="70" cy="64" r="6"/></g>`;
+const moto = col => `<g fill="none" stroke="${col}" stroke-width="5"><circle cx="31" cy="60" r="10"/><circle cx="70" cy="60" r="10"/><path d="M31 60 L46 46 H62 L70 60 M58 46 L54 36 H62" stroke-linecap="round"/></g><circle cx="50" cy="31" r="5" fill="${col}"/>`;
+const ped = (col,tx,sc) => `<g transform="translate(${tx??50} 50) scale(${sc||1})" fill="none" stroke="${col}" stroke-width="6" stroke-linecap="round"><circle cx="0" cy="-24" r="5" fill="${col}" stroke="none"/><path d="M0 -14 L-2 6 L-10 24 M-2 6 L8 24 M-12 -2 L0 -12 L12 -2"/></g>`;
+const SIGNS = [
+ {g:"Biển báo cấm",p:"P",d:"Hình tròn, viền đỏ, nền trắng, hình vẽ màu đen. Biểu thị điều cấm người tham gia giao thông không được vi phạm.",items:[
+  ["P.101","Đường cấm",prohib()],
+  ["P.102","Cấm đi ngược chiều",svg(`<circle cx="50" cy="50" r="47" fill="${R}"/><rect x="18" y="42" width="64" height="16" fill="${W}"/>`)],
+  ["P.103a","Cấm xe ô tô",prohib(car(K),1)],
+  ["P.104","Cấm xe mô tô",prohib(moto(K),1)],
+  ["P.106a","Cấm xe ô tô tải",prohib(truck(K),1)],
+  ["P.112","Cấm người đi bộ",prohib(ped(K),1)],
+  ["P.123a","Cấm rẽ trái",prohib(arrow("M58 76 V46 Q58 38 50 38 H36",K,8)+head(32,38,-90,K),1)],
+  ["P.123b","Cấm rẽ phải",prohib(arrow("M42 76 V46 Q42 38 50 38 H64",K,8)+head(68,38,90,K),1)],
+  ["P.124a","Cấm quay đầu xe",prohib(arrow("M60 76 V44 Q60 28 48 28 Q36 28 36 44 V58",K,8)+head(36,62,180,K),1)],
+  ["P.125","Cấm vượt",prohib(car(R,.7,34,50)+car(K,.7,66,50))],
+  ["P.127","Tốc độ tối đa cho phép",prohib(txt("50",K,46))],
+  ["P.128","Cấm sử dụng còi",prohib(`<path d="M28 40 H40 L60 26 V74 L40 60 H28 Z" fill="${K}"/>`,1)],
+  ["P.115","Hạn chế trọng lượng toàn bộ xe",prohib(txt("10t",K,38))],
+  ["P.117","Hạn chế chiều cao",prohib(txt("3,5m",K,30)+`<path d="M50 14 l-6 8 h12 Z M50 86 l-6 -8 h12 Z" fill="${K}"/>`)],
+  ["P.130","Cấm dừng xe và đỗ xe",svg(`<circle cx="50" cy="50" r="46" fill="${B}" stroke="${R}" stroke-width="8"/><path d="M20 20 L80 80 M80 20 L20 80" stroke="${R}" stroke-width="8"/>`)],
+  ["P.131a","Cấm đỗ xe",svg(`<circle cx="50" cy="50" r="46" fill="${B}" stroke="${R}" stroke-width="8"/><path d="M20 20 L80 80" stroke="${R}" stroke-width="8"/>`)],
+  ["DP.135","Hết tất cả các lệnh cấm",svg(`<circle cx="50" cy="50" r="46" fill="${W}" stroke="${K}" stroke-width="2"/><g stroke="${K}" stroke-width="3"><path d="M22 74 L74 22 M28 80 L80 28 M18 66 L66 18"/></g>`)],
+ ]},
+ {g:"Biển hiệu lệnh",p:"R",d:"Hình tròn nền xanh lam, hình vẽ màu trắng (riêng biển Dừng lại hình bát giác đỏ). Báo các lệnh bắt buộc phải chấp hành.",items:[
+  ["R.122","Dừng lại",svg(`<path d="M31 4 H69 L96 31 V69 L69 96 H31 L4 69 V31 Z" fill="${R}" stroke="${W}" stroke-width="3"/>`+txt("STOP",W,32))],
+  ["R.301a","Hướng đi phải theo: đi thẳng",mand(arrow("M50 80 V34",W,10)+head(50,26,0,W,14))],
+  ["R.301b","Hướng đi phải theo: rẽ phải",mand(arrow("M40 78 V50 Q40 40 50 40 H64",W,10)+head(72,40,90,W,14))],
+  ["R.301c","Hướng đi phải theo: rẽ trái",mand(arrow("M60 78 V50 Q60 40 50 40 H36",W,10)+head(28,40,-90,W,14))],
+  ["R.302a","Hướng phải đi vòng chướng ngại vật sang phải",mand(arrow("M34 34 L60 60",W,10)+head(66,66,135,W,14))],
+  ["R.303","Nơi giao nhau chạy theo vòng xuyến",mand(`<g fill="none" stroke="${W}" stroke-width="8"><path d="M50 24 A26 26 0 0 1 74 58"/><path d="M68 70 A26 26 0 0 1 28 64"/><path d="M26 54 A26 26 0 0 1 40 26"/></g>`+head(74,62,170,W,9)+head(26,60,-70,W,9)+head(44,25,60,W,9))],
+  ["R.304","Đường dành cho xe thô sơ",mand(`<g fill="none" stroke="${W}" stroke-width="5"><circle cx="31" cy="60" r="12"/><circle cx="69" cy="60" r="12"/><path d="M31 60 L44 40 H62 L69 60 M44 40 L52 60 L62 40" stroke-linejoin="round"/></g>`)],
+  ["R.305","Đường dành cho người đi bộ",mand(ped(W))],
+  ["R.306","Tốc độ tối thiểu cho phép",mand(txt("30",W,46))],
+  ["R.307","Hết hạn chế tốc độ tối thiểu",mand(txt("30",W,46)+`<path d="M24 76 L76 24" stroke="${R}" stroke-width="7"/>`)],
+  ["R.309","Ấn còi",mand(`<path d="M26 40 H38 L58 26 V74 L38 60 H26 Z" fill="${W}"/><path d="M66 38 Q74 50 66 62 M72 30 Q86 50 72 70" fill="none" stroke="${W}" stroke-width="4"/>`)],
+  ["R.420","Bắt đầu khu đông dân cư",info(`<g fill="${W}"><path d="M18 60 L30 46 L42 60 V78 H18 Z M44 54 L56 40 L68 54 V78 H44 Z M64 66 L74 56 L84 66 V78 H64 Z"/></g>`+txt("KHU ĐÔNG DÂN CƯ",W,13,26))],
+  ["R.421","Hết khu đông dân cư",info(`<g fill="${W}" opacity=".9"><path d="M18 60 L30 46 L42 60 V78 H18 Z M44 54 L56 40 L68 54 V78 H44 Z M64 66 L74 56 L84 66 V78 H64 Z"/></g><path d="M14 86 L86 14" stroke="${R}" stroke-width="6"/>`)],
+ ]},
+ {g:"Biển báo nguy hiểm và cảnh báo",p:"W",d:"Hình tam giác đều, viền đỏ, nền vàng, hình vẽ màu đen. Báo trước nguy hiểm để người lái chủ động phòng ngừa.",items:[
+  ["W.201a","Chỗ ngoặt nguy hiểm vòng bên trái",warn(arrow("M58 76 V58 Q58 46 44 46",K,7)+head(38,46,-90,K,9))],
+  ["W.201b","Chỗ ngoặt nguy hiểm vòng bên phải",warn(arrow("M42 76 V58 Q42 46 56 46",K,7)+head(62,46,90,K,9))],
+  ["W.202a","Nhiều chỗ ngoặt nguy hiểm liên tiếp",warn(arrow("M44 78 Q60 68 50 58 Q40 48 54 38",K,6)+head(58,34,45,K,8))],
+  ["W.205a","Đường giao nhau cùng cấp",warn(`<path d="M50 34 V78 M30 58 H70" stroke="${K}" stroke-width="8"/>`)],
+  ["W.207a","Giao nhau với đường không ưu tiên",warn(`<path d="M50 34 V78" stroke="${K}" stroke-width="10"/><path d="M32 58 H68" stroke="${K}" stroke-width="5"/>`)],
+  ["W.208","Giao nhau với đường ưu tiên",warn("",1)],
+  ["W.209","Giao nhau có tín hiệu đèn",warn(`<rect x="42" y="32" width="16" height="44" rx="4" fill="${K}"/><circle cx="50" cy="40" r="5" fill="${R}"/><circle cx="50" cy="54" r="5" fill="${Y}"/><circle cx="50" cy="68" r="5" fill="#18a54a"/>`)],
+  ["W.210","Giao nhau với đường sắt có rào chắn",warn(`<g stroke="${K}" stroke-width="4" fill="${W}"><rect x="24" y="52" width="52" height="12"/></g><path d="M34 52 V64 M46 52 V64 M58 52 V64 M70 52 V64" stroke="${K}" stroke-width="5"/><path d="M28 64 V78 M72 64 V78" stroke="${K}" stroke-width="4"/>`)],
+  ["W.211a","Giao nhau với đường sắt không có rào chắn",warn(`<g fill="${K}"><rect x="28" y="50" width="40" height="20" rx="2"/><rect x="60" y="38" width="12" height="32"/><rect x="34" y="42" width="6" height="10"/><circle cx="36" cy="74" r="5"/><circle cx="62" cy="74" r="5"/></g>`)],
+  ["W.212","Cầu hẹp",warn(`<path d="M38 34 Q44 56 38 78 M62 34 Q56 56 62 78" fill="none" stroke="${K}" stroke-width="6"/>`)],
+  ["W.219","Dốc xuống nguy hiểm",warn(`<path d="M26 54 L74 78 H26 Z" fill="${K}"/>`+txt("10%",K,16,46))],
+  ["W.220","Dốc lên nguy hiểm",warn(`<path d="M26 78 L74 54 V78 Z" fill="${K}"/>`+txt("10%",K,16,46))],
+  ["W.221b","Đường có sống trâu",warn(`<path d="M24 74 H36 Q50 50 64 74 H76" fill="none" stroke="${K}" stroke-width="6"/>`)],
+  ["W.224","Đường người đi bộ cắt ngang",warn(`<g transform="translate(0 6) scale(.8) translate(12 10)">${ped(K)}</g>`)],
+  ["W.225","Trẻ em",warn(`<g transform="translate(-4 10) scale(.7) translate(14 14)">${ped(K,38)}${ped(K,66,.8)}</g>`)],
+  ["W.227","Công trường",warn(`<g transform="translate(0 8) scale(.75) translate(14 10)">${ped(K,44)}</g><path d="M60 52 L70 78" stroke="${K}" stroke-width="4"/><path d="M58 74 Q66 66 78 72 V78 H58 Z" fill="${K}"/>`)],
+  ["W.233","Nguy hiểm khác",warn(`<rect x="45" y="34" width="10" height="28" rx="3" fill="${K}"/><circle cx="50" cy="72" r="6" fill="${K}"/>`)],
+  ["W.245a","Đi chậm",warn(txt("CHẬM",K,20,62))],
+ ]},
+ {g:"Biển chỉ dẫn",p:"I",d:"Hình chữ nhật hoặc hình vuông nền xanh lam. Cung cấp thông tin, hướng đi và các điểm cần biết trên đường.",items:[
+  ["I.401","Bắt đầu đường ưu tiên",svg(`<rect x="18" y="18" width="64" height="64" transform="rotate(45 50 50)" fill="${W}" stroke="${K}" stroke-width="2"/><rect x="29" y="29" width="42" height="42" transform="rotate(45 50 50)" fill="${Y}"/>`)],
+  ["I.402","Hết đoạn đường ưu tiên",svg(`<rect x="18" y="18" width="64" height="64" transform="rotate(45 50 50)" fill="${W}" stroke="${K}" stroke-width="2"/><rect x="29" y="29" width="42" height="42" transform="rotate(45 50 50)" fill="${Y}"/><path d="M28 72 L72 28" stroke="${K}" stroke-width="5"/>`)],
+  ["I.407a","Đường một chiều",info(arrow("M50 82 V34",W,12)+head(50,24,0,W,16))],
+  ["I.408","Nơi đỗ xe",info(txt("P",W,64,52))],
+  ["I.409","Chỗ quay xe",info(arrow("M62 80 V46 Q62 30 48 30 Q34 30 34 46 V60",W,9)+head(34,66,180,W,13))],
+  ["I.423b","Đường người đi bộ sang ngang",info(`<path d="M50 14 L86 82 H14 Z" fill="${W}"/><g transform="translate(0 14) scale(.62) translate(30 30)">${ped(K)}</g><path d="M30 78 H70" stroke="${K}" stroke-width="3" stroke-dasharray="5 4"/>`)],
+  ["I.425","Bệnh viện",info(`<rect x="22" y="22" width="56" height="56" fill="${W}"/><path d="M50 30 V70 M30 50 H70" stroke="${R}" stroke-width="12"/>`)],
+  ["I.434a","Bến xe buýt",info(`<g fill="${W}"><rect x="24" y="28" width="52" height="40" rx="6"/><circle cx="34" cy="72" r="6"/><circle cx="66" cy="72" r="6"/></g><rect x="30" y="34" width="40" height="14" fill="${B}"/>`)],
+ ]},
+];
+SIGNS.forEach(g=>g.items.forEach(it=>it.k=fold(it[0]+" "+it[1]+" "+g.g)));
+function renderSigns(){
+  const q = fold(document.getElementById("qs").value.trim()); let html="", n=0;
+  SIGNS.forEach(g=>{
+    const items = g.items.filter(it=>!q||it.k.includes(q)); if(!items.length) return; n+=items.length;
+    html += `<h3>${g.g} <span class="count">(${g.p}.)</span></h3><p class="group-desc">${g.d}</p>
+      <div class="signs">${items.map(([c,name,s])=>`<figure class="sign" style="margin:0">${s}<code>${c}</code><span>${name}</span></figure>`).join("")}</div>`;
+  });
+  document.getElementById("sign-groups").innerHTML = html || `<p class="lead">Không có biển báo phù hợp.</p>`;
+  document.getElementById("count-s").textContent = `${n} biển`;
+}
+document.getElementById("qs").addEventListener("input",renderSigns);
+
+/* ===== ĐIỀU HƯỚNG ===== */
+function route(){
+  const signs = location.hash==="#bien-bao";
+  document.getElementById("view-plates").hidden = signs;
+  document.getElementById("view-signs").hidden = !signs;
+  document.getElementById("tab-plates").toggleAttribute("aria-current",!signs);
+  document.getElementById("tab-signs").toggleAttribute("aria-current",signs);
+  if(!signs) document.getElementById("tab-plates").setAttribute("aria-current","page");
+  else document.getElementById("tab-signs").setAttribute("aria-current","page");
+}
+window.addEventListener("hashchange",route);
+renderPlates(); renderSigns(); route();
+</script>
+</body>
+</html>
