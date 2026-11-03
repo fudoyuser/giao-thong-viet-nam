@@ -69,6 +69,27 @@ mark{background:var(--hl);color:#14202b;border-radius:2px}
 .sign code{font-family:var(--display);font-size:15px;font-weight:600;color:var(--muted);letter-spacing:.04em}
 .sign span{font-size:13.5px;line-height:1.35}
 .group-desc{color:var(--muted);margin:0 0 14px;font-size:14px;max-width:80ch}
+.quiz{max-width:720px}
+.qbar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px;font-size:14px;color:var(--muted)}
+.progress{height:6px;background:var(--line);border-radius:99px;overflow:hidden;margin-bottom:18px}
+.progress i{display:block;height:100%;background:var(--road);transition:width .25s}
+.qcard{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:22px;display:flex;flex-direction:column;gap:16px}
+.qprompt{font-size:18px;font-weight:600;line-height:1.4;text-wrap:balance}
+.qvisual{display:flex;justify-content:center}
+.qvisual svg{width:128px;height:128px}
+.qvisual .plate{font-size:40px;padding:8px 18px 6px}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.opt{font:inherit;text-align:left;padding:12px 14px;border:1.5px solid var(--line);border-radius:9px;background:var(--bg);color:var(--fg);cursor:pointer;line-height:1.35;min-width:0}
+.opt:hover:not(:disabled){border-color:var(--road)}
+.opt:disabled{cursor:default}
+.opt.right{border-color:#18a54a;background:color-mix(in srgb,#18a54a 16%,var(--surface))}
+.opt.wrong{border-color:var(--red);background:color-mix(in srgb,var(--red) 14%,var(--surface))}
+.feedback{font-size:14px;min-height:1.4em}
+.btn{font:inherit;font-weight:600;padding:11px 20px;border:0;border-radius:9px;background:var(--road);color:var(--road-fg);cursor:pointer;align-self:flex-start}
+.btn.ghost{background:transparent;color:var(--fg);border:1px solid var(--line)}
+.score{font-family:var(--display);font-size:64px;font-weight:700;line-height:1}
+.review{display:flex;flex-direction:column;gap:8px;font-size:14px}
+.review div{padding:10px 12px;border-radius:8px;background:var(--bg);border:1px solid var(--line)}
 footer{border-top:1px solid var(--line);color:var(--muted);font-size:13px}
 footer .wrap{padding-block:20px 32px}
 footer a{color:inherit}
@@ -85,6 +106,7 @@ footer a{color:inherit}
     <nav aria-label="Chuyên mục">
       <a href="#bien-so" id="tab-plates">Biển số xe</a>
       <a href="#bien-bao" id="tab-signs">Biển báo giao thông</a>
+      <a href="#on-tap" id="tab-quiz">Ôn tập</a>
     </nav>
   </div>
 </header>
@@ -126,6 +148,21 @@ footer a{color:inherit}
     </div>
     <div id="sign-groups"></div>
   </section>
+<section id="view-quiz" hidden>
+  <div class="quiz">
+    <h2>Ôn tập trắc nghiệm</h2>
+    <p class="lead">Mỗi lượt 10 câu, câu hỏi và đáp án được xáo ngẫu nhiên. Chọn chủ đề rồi bấm Bắt đầu.</p>
+    <div class="tools">
+      <div class="seg" role="group" aria-label="Chủ đề ôn tập">
+        <button type="button" id="qt-mix" aria-pressed="true">Tổng hợp</button>
+        <button type="button" id="qt-sign" aria-pressed="false">Biển báo</button>
+        <button type="button" id="qt-plate" aria-pressed="false">Biển số</button>
+      </div>
+      <button type="button" class="btn" id="q-start">Bắt đầu lượt mới</button>
+    </div>
+    <div id="quiz-box"></div>
+  </div>
+</section>
 </main>
 
 <footer>
@@ -310,15 +347,90 @@ function renderSigns(){
 }
 document.getElementById("qs").addEventListener("input",renderSigns);
 
+/* ===== ÔN TẬP ===== */
+const shuffle = a => { a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]} return a; };
+const pick = (arr,n,not) => shuffle(arr.filter(x=>!not.includes(x))).slice(0,n);
+const ALLSIGNS = SIGNS.flatMap(g=>g.items.map(it=>({code:it[0],name:it[1],svg:it[2],group:g.g})));
+const GROUPS = SIGNS.map(g=>g.g);
+const NEWNAMES = NEW.map(n=>n.name);
+function makeQ(kind){
+  const r = Math.random();
+  if(kind==="sign"){
+    const s = ALLSIGNS[Math.floor(Math.random()*ALLSIGNS.length)];
+    if(r<.6) return {prompt:"Biển báo này có ý nghĩa gì?", visual:s.svg, answer:s.name,
+      opts:[s.name,...pick(ALLSIGNS.map(x=>x.name),3,[s.name])], explain:`${s.code}: ${s.name}`};
+    if(r<.8) return {prompt:`Biển “${s.name}” thuộc nhóm nào?`, visual:s.svg, answer:s.group,
+      opts:shuffle(GROUPS), explain:`${s.code} thuộc nhóm ${s.group}.`};
+    const others = pick(ALLSIGNS,3,[s]).map(x=>x.code);
+    return {prompt:`Mã hiệu của biển “${s.name}” là gì?`, visual:s.svg, answer:s.code,
+      opts:[s.code,...others], explain:`${s.name} có mã ${s.code}.`};
+  }
+  const o = OLD[Math.floor(Math.random()*OLD.length)];
+  const c = o.codes[Math.floor(Math.random()*o.codes.length)];
+  if(r<.4) return {prompt:"Biển số có mã này là của tỉnh, thành cũ nào?", visual:`<span class="plate">${c}</span>`, answer:o.name,
+    opts:[o.name,...pick(OLD.map(x=>x.name),3,[o.name])], explain:`Mã ${c} là ${o.name}, nay thuộc ${o.to}.`};
+  const m = OLD.filter(x=>x.merged); const mo = m[Math.floor(Math.random()*m.length)];
+  if(r<.75) return {prompt:`Sau sáp nhập năm 2025, tỉnh ${mo.name} cũ nay thuộc tỉnh, thành nào?`, visual:`<span class="plate">${mo.codes[0]}</span>`, answer:mo.to,
+    opts:[mo.to,...pick(NEWNAMES,3,[mo.to])], explain:`${mo.name} (mã ${mo.codes.join(", ")}) nay thuộc ${mo.to}.`};
+  const n = NEW.filter(x=>x.from.length>1)[Math.floor(Math.random()*NEW.filter(x=>x.from.length>1).length)];
+  const own = n.from.flatMap(f=>f[1]); const right = own[Math.floor(Math.random()*own.length)];
+  const wrong = pick(OLD.flatMap(x=>x.codes),3,own);
+  return {prompt:`Mã biển số nào thuộc ${n.name} hiện nay?`, visual:"", answer:right,
+    opts:[right,...wrong], explain:`${n.name} gồm các mã ${own.join(", ")}.`};
+}
+let qType="mix", qs=[], qi=0, score=0, wrongs=[];
+function startQuiz(){
+  qs=[]; const seen=new Set();
+  while(qs.length<10){
+    const k = qType==="mix" ? (Math.random()<.5?"sign":"plate") : qType;
+    const q = makeQ(k); if(seen.has(q.prompt+q.answer)) continue; seen.add(q.prompt+q.answer);
+    q.opts = shuffle([...new Set(q.opts)]); qs.push(q);
+  }
+  qi=0; score=0; wrongs=[]; showQ();
+}
+function showQ(){
+  const box=document.getElementById("quiz-box"), q=qs[qi];
+  box.innerHTML = `<div class="qbar"><span>Câu ${qi+1} / ${qs.length}</span><span>Đúng: ${score}</span></div>
+    <div class="progress"><i style="width:${qi/qs.length*100}%"></i></div>
+    <div class="qcard"><div class="qprompt">${esc(q.prompt)}</div>${q.visual?`<div class="qvisual">${q.visual}</div>`:""}
+    <div class="opts">${q.opts.map((o,i)=>`<button type="button" class="opt" id="opt-${i}">${esc(o)}</button>`).join("")}</div>
+    <div class="feedback" id="fb" aria-live="polite"></div></div>`;
+  q.opts.forEach((o,i)=>document.getElementById("opt-"+i).addEventListener("click",()=>answer(i)));
+}
+function answer(i){
+  const q=qs[qi], ok=q.opts[i]===q.answer;
+  q.opts.forEach((o,j)=>{const b=document.getElementById("opt-"+j); b.disabled=true;
+    if(o===q.answer) b.classList.add("right"); else if(j===i) b.classList.add("wrong");});
+  if(ok) score++; else wrongs.push(q);
+  const fb=document.getElementById("fb");
+  fb.innerHTML = `${ok?"<b>Chính xác.</b>":"<b>Chưa đúng.</b>"} ${esc(q.explain)}`;
+  const nx=document.createElement("button"); nx.type="button"; nx.className="btn"; nx.id="q-next";
+  nx.textContent = qi<qs.length-1 ? "Câu tiếp theo" : "Xem kết quả";
+  nx.addEventListener("click",()=>{qi++; qi<qs.length?showQ():showResult();});
+  fb.after(nx); nx.focus();
+}
+function showResult(){
+  const pct=score/qs.length, msg = pct===1?"Xuất sắc, không sai câu nào.":pct>=.8?"Rất tốt, bạn nắm khá chắc.":pct>=.5?"Khá ổn, ôn lại các câu sai bên dưới.":"Nên xem lại phần tra cứu rồi làm lượt mới.";
+  document.getElementById("quiz-box").innerHTML = `<div class="progress"><i style="width:100%"></i></div>
+    <div class="qcard"><div class="score">${score}/${qs.length}</div><div class="qprompt">${msg}</div>
+    ${wrongs.length?`<div class="review"><b>Các câu cần ôn lại</b>${wrongs.map(w=>`<div>${esc(w.prompt)}<br><b>Đáp án:</b> ${esc(w.answer)}. ${esc(w.explain)}</div>`).join("")}</div>`:""}
+    <button type="button" class="btn" id="q-again">Làm lượt mới</button></div>`;
+  document.getElementById("q-again").addEventListener("click",startQuiz);
+}
+["mix","sign","plate"].forEach(t=>document.getElementById("qt-"+t).addEventListener("click",()=>{
+  qType=t; ["mix","sign","plate"].forEach(x=>document.getElementById("qt-"+x).setAttribute("aria-pressed",x===t)); startQuiz();
+}));
+document.getElementById("q-start").addEventListener("click",startQuiz);
+startQuiz();
+
 /* ===== ĐIỀU HƯỚNG ===== */
 function route(){
-  const signs = location.hash==="#bien-bao";
-  document.getElementById("view-plates").hidden = signs;
-  document.getElementById("view-signs").hidden = !signs;
-  document.getElementById("tab-plates").toggleAttribute("aria-current",!signs);
-  document.getElementById("tab-signs").toggleAttribute("aria-current",signs);
-  if(!signs) document.getElementById("tab-plates").setAttribute("aria-current","page");
-  else document.getElementById("tab-signs").setAttribute("aria-current","page");
+  const v = {"#bien-bao":"signs","#on-tap":"quiz"}[location.hash] || "plates";
+  ["plates","signs","quiz"].forEach(k=>{
+    document.getElementById("view-"+k).hidden = k!==v;
+    const t=document.getElementById("tab-"+k);
+    if(k===v) t.setAttribute("aria-current","page"); else t.removeAttribute("aria-current");
+  });
 }
 window.addEventListener("hashchange",route);
 renderPlates(); renderSigns(); route();

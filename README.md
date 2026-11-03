@@ -4,6 +4,7 @@ Trang tra cứu mở về giao thông Việt Nam:
 
 - **Biển số xe**: mã biển số của 63 tỉnh, thành cũ và 34 tỉnh, thành mới sau sáp nhập (từ 01/7/2025, theo Nghị quyết 202/2025/QH15). Tìm theo tên tỉnh (có dấu hoặc không dấu) hoặc theo mã số.
 - **Biển báo giao thông**: các biển thường gặp theo QCVN 41:2024/BGTVT, chia nhóm: biển cấm (P), hiệu lệnh (R), nguy hiểm và cảnh báo (W), chỉ dẫn (I).
+- **Ôn tập**: trắc nghiệm 10 câu mỗi lượt (biển báo, biển số hoặc tổng hợp), có giải thích sau mỗi câu và danh sách câu cần ôn lại.
 
 Mở `index.html` trong trình duyệt, hoặc bật GitHub Pages (Settings → Pages → Deploy from branch `main`, thư mục `/`).
 
